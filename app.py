@@ -29,3 +29,20 @@ def analyze_log(file_path):
 @app.get("/analyze")
 def analyze(file: str):
     return analyze_log(file)
+
+import joblib
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+vectorizer, model = joblib.load("model.pkl")
+
+class TextInput(BaseModel):
+    text: str
+
+@app.post("/predict")
+def predict(data: TextInput):
+    X = vectorizer.transform([data.text])
+    prediction = model.predict(X)[0]
+    return {"prediction": int(prediction)}
